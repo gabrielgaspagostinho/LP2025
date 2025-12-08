@@ -1,14 +1,14 @@
 # Análise Comparativa de Estruturas de Dados: AVL Tree vs. Min-Heap
 
-Este repositório contém o trabalho final da disciplina, focando na implementação e análise comparativa de desempenho entre duas estruturas de dados fundamentais — Árvore AVL (Padrão) e Min-Heap (Pura) — aplicadas a um cenário de processamento de dados de sensores de temperatura.
+Este repositório contém o trabalho final da disciplina, focando na implementação e análise comparativa de desempenho entre duas estruturas de dados fundamentais — Árvore AVL e Min-Heap — aplicadas a um cenário de processamento de dados de sensores de temperatura.
 
 ## 1\. Resumo
 
-O objetivo deste projeto é comparar a eficiência de uma Árvore Binária de Busca Balanceada (AVL) e uma Fila de Prioridade (Min-Heap) em operações críticas para sistemas de monitoramento. Foram implementadas versões "puras" (sem metadados estatísticos adicionais) de ambas as estruturas em C++. Um *benchmark* foi desenvolvido para ingerir um dataset de temperaturas gerado sinteticamente e cronometrar as operações de inserção em massa, cálculo da mediana, consulta por intervalo e remoção de elementos.
+O objetivo deste projeto é comparar a eficiência de uma Árvore Binária de Busca Balanceada (AVL) e uma Fila de Prioridade (Min-Heap) em operações críticas para sistemas de monitoramento. Foram implementadas versões "puras" (sem metadados estatísticos adicionais) de ambas as estruturas em C++. Um benchmark foi desenvolvido para ingerir um dataset de temperaturas gerado sinteticamente e cronometrar as operações de inserção em massa, cálculo da mediana, consulta por intervalo e remoção de elementos.
 
 ## 2\. Descrição do Problema e da Escolha da Solução
 
-**O Problema:** Sistemas que lidam com dados de sensores (IoT) precisam de alta performance para ingerir grandes volumes de dados rapidamente. No entanto, também é necessário realizar consultas analíticas (como encontrar a mediana ou filtrar por faixas de temperatura) e remover dados antigos para liberar memória.
+**O Problema:** Sistemas que lidam com dados de sensores precisam de alta performance para ingerir grandes volumes de dados rapidamente. No entanto, também é necessário realizar consultas analíticas (como encontrar a mediana ou filtrar por faixas de temperatura) e remover dados antigos para liberar memória.
 
 **A Solução e as Estruturas:**
 A escolha das estruturas visa contrastar duas abordagens distintas:
@@ -129,5 +129,5 @@ Ferramentas de IA generativa foram utilizadas para auxiliar na estruturação de
 ## 8\. Referências
 
   * Cormen, T. H., Leiserson, C. E., Rivest, R. L., & Stein, C. *Introduction to Algorithms*. 3rd ed. MIT Press. (Seções sobre Heaps e Árvores Binárias de Busca Balanceadas).
-  * Material de aula da disciplina de Estrutura de Dados.
+  * Material de aula da disciplina de Linguagem de Programação.
   * Documentação da referência C++ para a biblioteca `<chrono>`, `<vector>` e `<random>`.
