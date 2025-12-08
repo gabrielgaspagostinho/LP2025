@@ -1,9 +1,3 @@
-Aqui está o arquivo `README.md` atualizado. Adicionei uma seção específica descrevendo o funcionamento técnico do `gerardados.cpp` (explicando o uso do *Mersenne Twister* para dar um ar mais técnico) e o incluí na organização dos arquivos.
-
-Pode substituir o conteúdo anterior por este:
-
------
-
 # Análise Comparativa de Estruturas de Dados: AVL Tree vs. Min-Heap
 
 Este repositório contém o trabalho final da disciplina, focando na implementação e análise comparativa de desempenho entre duas estruturas de dados fundamentais — Árvore AVL (Padrão) e Min-Heap (Pura) — aplicadas a um cenário de processamento de dados de sensores de temperatura.
