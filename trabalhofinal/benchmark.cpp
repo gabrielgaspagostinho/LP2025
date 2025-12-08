@@ -6,9 +6,7 @@
 #include <chrono> 
 #include <iomanip>
 
-// ==========================================
-// 1. CLASSE HEAP PURA (Min-Heap)
-// ==========================================
+// healp do arquivo heaptree.cpp
 class PureMinHeap {
 private:
     std::vector<double> heap;
@@ -75,9 +73,7 @@ public:
     }
 };
 
-// ==========================================
-// 2. CLASSE AVL TREE
-// ==========================================
+// arvore AVL do arquivo AVLtree.cpp
 struct AVLNode {
     double key;
     AVLNode *left, *right;
@@ -197,15 +193,12 @@ public:
     }
 };
 
-// ==========================================
-// 3. CLASSE VECTOR + INSERTION SORT
-// ==========================================
+// insertion sort
 class VectorInsertionSort {
 private:
     std::vector<double> data;
     bool sorted = false;
 
-    // Algoritmo Insertion Sort: O(N^2)
     void runInsertionSort() {
         int n = data.size();
         for (int i = 1; i < n; i++) {
@@ -221,13 +214,12 @@ private:
     }
 
 public:
-    // Inserção O(1)
+    
     void insert(double value) {
         data.push_back(value);
         sorted = false;
     }
 
-    // Remoção O(N)
     void remove(double value) {
         for (auto it = data.begin(); it != data.end(); ++it) {
             if (*it == value) {
@@ -237,7 +229,6 @@ public:
         }
     }
 
-    // Mediana O(N^2) no pior caso (devido ao sort)
     double median() {
         if (data.empty()) return 0.0;
         if (!sorted) runInsertionSort();
@@ -247,7 +238,6 @@ public:
         else return (data[n / 2 - 1] + data[n / 2]) / 2.0;
     }
 
-    // Range O(N)
     std::vector<double> rangeQuery(double x, double y) {
         std::vector<double> result;
         for (double val : data) {
@@ -257,9 +247,7 @@ public:
     }
 };
 
-// ==========================================
 // BENCHMARKING
-// ==========================================
 
 std::vector<double> lerCSV(const std::string& arquivo) {
     std::vector<double> dados;
@@ -289,7 +277,7 @@ int main() {
 
     PureMinHeap heap;
     AVLTree avl;
-    VectorInsertionSort vec; // Nova estrutura
+    VectorInsertionSort vec;
 
     using namespace std::chrono;
 
@@ -395,3 +383,4 @@ int main() {
 
     return 0;
 }
+
