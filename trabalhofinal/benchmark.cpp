@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-#include <chrono> // Para medir o tempo
+#include <chrono> 
 #include <iomanip>
 
 // ==========================================
@@ -45,7 +45,6 @@ public:
 
     void remove(double value) {
         int index = -1;
-        // Busca linear O(N)
         for (size_t i = 0; i < heap.size(); i++) {
             if (heap[i] == value) { index = i; break; }
         }
@@ -58,7 +57,6 @@ public:
         }
     }
 
-    // O(N log N) - Precisa ordenar cópia
     double median() {
         if (heap.empty()) return 0.0;
         std::vector<double> temp = heap;
@@ -68,7 +66,6 @@ public:
         else return (temp[n / 2 - 1] + temp[n / 2]) / 2.0;
     }
 
-    // O(N) - Busca linear completa
     std::vector<double> rangeQuery(double x, double y) {
         std::vector<double> result;
         for (double val : heap) {
@@ -79,7 +76,7 @@ public:
 };
 
 // ==========================================
-// 2. CLASSE AVL PURA
+// 2. CLASSE AVL TREE
 // ==========================================
 struct AVLNode {
     double key;
@@ -184,7 +181,6 @@ public:
     void insert(double value) { root = insertRec(root, value); }
     void remove(double value) { root = removeRec(root, value); }
 
-    // O(N) - Percorre árvore
     double median() {
         std::vector<double> list;
         inorderToList(root, list);
@@ -194,7 +190,6 @@ public:
         return (list[n / 2 - 1] + list[n / 2]) / 2.0;
     }
 
-    // O(N) Otimizado (poda ramos inúteis)
     std::vector<double> rangeQuery(double x, double y) {
         std::vector<double> res;
         rangeQueryRec(root, x, y, res);
@@ -203,10 +198,69 @@ public:
 };
 
 // ==========================================
-// 3. BENCHMARK
+// 3. CLASSE VECTOR + INSERTION SORT
+// ==========================================
+class VectorInsertionSort {
+private:
+    std::vector<double> data;
+    bool sorted = false;
+
+    // Algoritmo Insertion Sort: O(N^2)
+    void runInsertionSort() {
+        int n = data.size();
+        for (int i = 1; i < n; i++) {
+            double key = data[i];
+            int j = i - 1;
+            while (j >= 0 && data[j] > key) {
+                data[j + 1] = data[j];
+                j = j - 1;
+            }
+            data[j + 1] = key;
+        }
+        sorted = true;
+    }
+
+public:
+    // Inserção O(1)
+    void insert(double value) {
+        data.push_back(value);
+        sorted = false;
+    }
+
+    // Remoção O(N)
+    void remove(double value) {
+        for (auto it = data.begin(); it != data.end(); ++it) {
+            if (*it == value) {
+                data.erase(it);
+                return;
+            }
+        }
+    }
+
+    // Mediana O(N^2) no pior caso (devido ao sort)
+    double median() {
+        if (data.empty()) return 0.0;
+        if (!sorted) runInsertionSort();
+
+        int n = data.size();
+        if (n % 2 != 0) return data[n / 2];
+        else return (data[n / 2 - 1] + data[n / 2]) / 2.0;
+    }
+
+    // Range O(N)
+    std::vector<double> rangeQuery(double x, double y) {
+        std::vector<double> result;
+        for (double val : data) {
+            if (val >= x && val <= y) result.push_back(val);
+        }
+        return result;
+    }
+};
+
+// ==========================================
+// BENCHMARKING
 // ==========================================
 
-// Função auxiliar para leitura
 std::vector<double> lerCSV(const std::string& arquivo) {
     std::vector<double> dados;
     std::ifstream file(arquivo);
@@ -217,9 +271,7 @@ std::vector<double> lerCSV(const std::string& arquivo) {
     }
     while (std::getline(file, linha)) {
         if (!linha.empty()) {
-            try {
-                dados.push_back(std::stod(linha));
-            } catch (...) {}
+            try { dados.push_back(std::stod(linha)); } catch (...) {}
         }
     }
     return dados;
@@ -228,7 +280,7 @@ std::vector<double> lerCSV(const std::string& arquivo) {
 int main() {
     std::vector<double> dataset = lerCSV("temperaturas.csv");
     if (dataset.empty()) {
-        std::cout << "Gere o CSV primeiro com o script Python!" << std::endl;
+        std::cout << "Gere o CSV primeiro!" << std::endl;
         return 1;
     }
 
@@ -237,90 +289,109 @@ int main() {
 
     PureMinHeap heap;
     AVLTree avl;
+    VectorInsertionSort vec; // Nova estrutura
 
     using namespace std::chrono;
 
-    // --- TESTE 1: INSERÇÃO (1000 itens) ---
+    // --- TESTE 1: INSERÇÃO ---
     auto start = high_resolution_clock::now();
     for (double val : dataset) heap.insert(val);
     auto end = high_resolution_clock::now();
-    auto timeHeapInsert = duration_cast<microseconds>(end - start).count();
+    auto tHeapIns = duration_cast<microseconds>(end - start).count();
 
     start = high_resolution_clock::now();
     for (double val : dataset) avl.insert(val);
     end = high_resolution_clock::now();
-    auto timeAvlInsert = duration_cast<microseconds>(end - start).count();
+    auto tAvlIns = duration_cast<microseconds>(end - start).count();
+
+    start = high_resolution_clock::now();
+    for (double val : dataset) vec.insert(val);
+    end = high_resolution_clock::now();
+    auto tVecIns = duration_cast<microseconds>(end - start).count(); // Deve ser muito rápido
 
     // --- TESTE 2: MEDIANA ---
     start = high_resolution_clock::now();
-    double medHeap = heap.median();
+    heap.median();
     end = high_resolution_clock::now();
-    auto timeHeapMedian = duration_cast<microseconds>(end - start).count();
+    auto tHeapMed = duration_cast<microseconds>(end - start).count();
 
     start = high_resolution_clock::now();
-    double medAvl = avl.median();
+    avl.median();
     end = high_resolution_clock::now();
-    auto timeAvlMedian = duration_cast<microseconds>(end - start).count();
-
-    // --- TESTE 3: RANGE QUERY (20.0 a 30.0) ---
-    start = high_resolution_clock::now();
-    auto resHeap = heap.rangeQuery(20.0, 30.0);
-    end = high_resolution_clock::now();
-    auto timeHeapRange = duration_cast<microseconds>(end - start).count();
+    auto tAvlMed = duration_cast<microseconds>(end - start).count();
 
     start = high_resolution_clock::now();
-    auto resAvl = avl.rangeQuery(20.0, 30.0);
+    vec.median(); // Aqui o Insertion Sort O(N^2) vai pesar
     end = high_resolution_clock::now();
-    auto timeAvlRange = duration_cast<microseconds>(end - start).count();
+    auto tVecMed = duration_cast<microseconds>(end - start).count();
 
-    // --- TESTE 4: REMOÇÃO (Primeiros 100 itens do CSV) ---
-    // Clonamos os dados para não afetar testes futuros se houvesse, mas aqui é o fim.
+    // --- TESTE 3: RANGE QUERY ---
+    start = high_resolution_clock::now();
+    heap.rangeQuery(20.0, 30.0);
+    end = high_resolution_clock::now();
+    auto tHeapRng = duration_cast<microseconds>(end - start).count();
+
+    start = high_resolution_clock::now();
+    avl.rangeQuery(20.0, 30.0);
+    end = high_resolution_clock::now();
+    auto tAvlRng = duration_cast<microseconds>(end - start).count();
+
+    start = high_resolution_clock::now();
+    vec.rangeQuery(20.0, 30.0);
+    end = high_resolution_clock::now();
+    auto tVecRng = duration_cast<microseconds>(end - start).count();
+
+    // --- TESTE 4: REMOÇÃO (100 itens) ---
     std::vector<double> toRemove;
     for(int i=0; i<100; i++) toRemove.push_back(dataset[i]);
 
     start = high_resolution_clock::now();
     for (double val : toRemove) heap.remove(val);
     end = high_resolution_clock::now();
-    auto timeHeapRemove = duration_cast<microseconds>(end - start).count();
+    auto tHeapRem = duration_cast<microseconds>(end - start).count();
 
     start = high_resolution_clock::now();
     for (double val : toRemove) avl.remove(val);
     end = high_resolution_clock::now();
-    auto timeAvlRemove = duration_cast<microseconds>(end - start).count();
+    auto tAvlRem = duration_cast<microseconds>(end - start).count();
+
+    start = high_resolution_clock::now();
+    for (double val : toRemove) vec.remove(val);
+    end = high_resolution_clock::now();
+    auto tVecRem = duration_cast<microseconds>(end - start).count();
 
     // --- RESULTADOS ---
     std::cout << "\n=== RESULTADOS DO BENCHMARK (Microsegundos - us) ===\n";
-    std::cout << std::left << std::setw(20) << "Operacao" 
-            << std::setw(15) << "HEAP (Pura)" 
-            << std::setw(15) << "AVL (Padrao)" 
-            << "Vencedor" << std::endl;
+    std::cout << std::left << std::setw(15) << "Operacao" 
+              << std::setw(12) << "HEAP" 
+              << std::setw(12) << "AVL" 
+              << std::setw(12) << "VEC(Ins)" 
+              << "Vencedor" << std::endl;
     std::cout << "------------------------------------------------------------\n";
     
-    std::cout << std::left << std::setw(20) << "Insert (1000x)" 
-            << std::setw(15) << timeHeapInsert 
-            << std::setw(15) << timeAvlInsert 
-            << (timeHeapInsert < timeAvlInsert ? "HEAP" : "AVL") << std::endl;
+    // Lambda para imprimir linha da tabela
+    auto printRow = [](std::string op, long tH, long tA, long tV) {
+        std::string winner;
+        if (tH <= tA && tH <= tV) winner = "HEAP";
+        else if (tA <= tH && tA <= tV) winner = "AVL";
+        else winner = "VEC";
 
-    std::cout << std::left << std::setw(20) << "Median Calc" 
-            << std::setw(15) << timeHeapMedian 
-            << std::setw(15) << timeAvlMedian 
-            << (timeHeapMedian < timeAvlMedian ? "HEAP" : "AVL") << std::endl;
+        std::cout << std::left << std::setw(15) << op 
+                  << std::setw(12) << tH 
+                  << std::setw(12) << tA 
+                  << std::setw(12) << tV 
+                  << winner << std::endl;
+    };
 
-    std::cout << std::left << std::setw(20) << "Range Query" 
-            << std::setw(15) << timeHeapRange 
-            << std::setw(15) << timeAvlRange 
-            << (timeHeapRange < timeAvlRange ? "HEAP" : "AVL") << std::endl;
+    printRow("Insert (1000x)", tHeapIns, tAvlIns, tVecIns);
+    printRow("Median Calc", tHeapMed, tAvlMed, tVecMed);
+    printRow("Range Query", tHeapRng, tAvlRng, tVecRng);
+    printRow("Remove (100x)", tHeapRem, tAvlRem, tVecRem);
 
-    std::cout << std::left << std::setw(20) << "Remove (100x)" 
-            << std::setw(15) << timeHeapRemove 
-            << std::setw(15) << timeAvlRemove 
-            << (timeHeapRemove < timeAvlRemove ? "HEAP" : "AVL") << std::endl;
-
-    std::cout << "\nNota(com base nos conhecimentos sobre as arvores): \n";
-    std::cout << "- HEAP vence em insercao (log N simples vs log N com rebalanceamento).\n";
-    std::cout << "- AVL vence em remocao e range (log N vs linear).\n";
-    std::cout << "- Mediana: AVL O(N) vs Heap O(N log N) (Devido a ordenacao necessaria).\n";
+    std::cout << "\nAnalise Rapida: \n";
+    std::cout << "- Vector (Ins) vence na insercao pois e O(1) (so adiciona ao fim).\n";
+    std::cout << "- Vector perde feio na Mediana pois roda Insertion Sort O(N^2).\n";
+    std::cout << "- AVL continua imbativel em Range e Remove.\n";
 
     return 0;
-
 }
