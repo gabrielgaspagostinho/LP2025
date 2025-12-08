@@ -316,10 +316,11 @@ int main() {
             << std::setw(15) << timeAvlRemove 
             << (timeHeapRemove < timeAvlRemove ? "HEAP" : "AVL") << std::endl;
 
-    std::cout << "\nNota: \n";
+    std::cout << "\nNota(com base nos conhecimentos sobre as arvores): \n";
     std::cout << "- HEAP vence em insercao (log N simples vs log N com rebalanceamento).\n";
     std::cout << "- AVL vence em remocao e range (log N vs linear).\n";
     std::cout << "- Mediana: AVL O(N) vs Heap O(N log N) (Devido a ordenacao necessaria).\n";
 
     return 0;
+
 }
