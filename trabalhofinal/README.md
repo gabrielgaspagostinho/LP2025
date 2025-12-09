@@ -1,127 +1,88 @@
-# Análise Comparativa: AVL, Heap e Vector (Insertion Sort)
+# Análise de Estruturas de Dados para Sensores de Temperatura
 
-Este repositório contém o trabalho final da disciplina, focado na análise de desempenho de estruturas de dados aplicadas ao processamento de sensores de temperatura. O projeto compara uma **Árvore AVL**, uma **Min-Heap** e um **Vetor com Ordenação Tardia** (Lazy Insertion Sort).
+**Universidade Federal do Rio de Janeiro (UFRJ)** **Curso:** Engenharia de Controle e Automação  
+**Disciplina:** Linguagens de Programação  
+**Autores:** [Inserir Nomes dos Integrantes Aqui]  
 
-## 1\. Resumo
+---
 
-O projeto implementa três estruturas de dados fundamentais em C++ sem o uso de bibliotecas de contêineres complexas (como `std::set` ou `std::priority_queue`). O objetivo é processar um fluxo de dados de temperatura e medir a eficiência de cada estrutura em quatro operações críticas: ingestão de dados, cálculos estatísticos (mediana), filtragem por intervalo e limpeza de dados.
+## 1. Introdução e Motivação
 
-## 2\. Descrição do Problema e da Escolha da Solução
+Este projeto foi desenvolvido para atender à demanda de uma empresa de automação industrial que necessita otimizar o processamento de dados de sensores de temperatura. O sistema legado, baseado em listas e ordenação simples (*Insertion Sort*), não apresenta escalabilidade adequada para o volume crescente de sensores (centenas ou milhares), resultando em lentidão nas consultas e na tomada de decisão em tempo real.
 
-**O Problema:** Em sistemas embarcados e IoT, a memória e o processamento são limitados. É crucial escolher a estrutura de dados correta dependendo do perfil de uso da aplicação (ex: um sistema que apenas grava dados versus um sistema que realiza muitas consultas estatísticas).
+O objetivo deste trabalho é implementar, comparar e analisar duas abordagens principais:
+1.  **Abordagem Básica:** Vetor com *Insertion Sort* (Ordenação por Inserção).
+2.  **Abordagem Aprimorada:** Uso de estruturas baseadas em árvores (**Min-Heap** e **Árvore AVL**).
 
-**Soluções Escolhidas:**
+## 2. Fundamentação Teórica (Análise Assintótica)
 
-1.  **Min-Heap (Pura):** Escolhida pela sua teórica eficiência na inserção e acesso imediato ao valor mínimo.
-2.  **Árvore AVL (Padrão):** Escolhida para garantir buscas e remoções eficientes ($O(\log n)$) através do auto-balanceamento, evitando a degradação de performance.
-3.  **Vector (Insertion Sort):** Adicionado como "Grupo de Controle". Ele utiliza uma estratégia *Lazy*: insere instantaneamente no final do vetor ($O(1)$), mas paga um alto custo de ordenação ($O(N^2)$) apenas quando a estatística é solicitada.
+A escolha da estrutura de dados impacta diretamente o desempenho do sistema. Abaixo apresentamos a comparação teórica da complexidade de tempo (Big-O) para as operações críticas do sistema.
 
-## 3\. Descrição Técnica das Estruturas de Dados
+| Operação | Vetor (Insertion Sort) | Min-Heap | Árvore AVL | Justificativa |
+| :--- | :---: | :---: | :---: | :--- |
+| **Inserção** | $O(1)^*$ | $O(\log N)$ | $O(\log N)$ | AVL requer rebalanceamento (rotações); Heap apenas *sift-up*. O Vetor insere no final em $O(1)$, mas deixa o custo para a leitura. |
+| **Busca (Search)** | $O(N)$ | $O(N)$ | $O(\log N)$ | AVL é uma árvore de busca binária balanceada. Heap não garante ordem lateral (apenas vertical). |
+| **Remoção** | $O(N)$ | $O(N)$ (busca) + $O(\log N)$ | $O(\log N)$ | Remover do vetor exige deslocar elementos. Heap exige busca linear prévia para achar o elemento. |
+| **Mínimo (Min)** | $O(N)$ ou $O(1)$** | $O(1)$ | $O(\log N)$ | A raiz da Min-Heap é sempre o menor elemento. Na AVL, basta percorrer à esquerda. |
+| **Range Query** | $O(N)$ | $O(N)$ | $O(\log N + K)$ | A AVL permite descartar subárvores inteiras que não estão no intervalo. |
+| **Ordenação** | $O(N^2)$ | $O(N \log N)$ | $O(N)$ (In-order) | Insertion Sort é quadrático (gargalo crítico). AVL já mantém ordem implícita. |
 
-  * **Min-Heap Pura (`heaptree.cpp`):** Implementada sobre um vetor dinâmico. Mantém a propriedade de que o nó pai é sempre menor que os filhos. Otimizada para inserção ($O(\log n)$ via *sift-up*), mas lenta para buscas arbitrárias ($O(n)$).
-  * **Árvore AVL Padrão (`AVLtree.cpp`):** Árvore Binária de Busca onde a diferença de altura das subárvores é no máximo 1. Garante ordenação total dos dados. Utiliza rotações simples e duplas para manter o balanceamento após inserções e remoções.
-  * **Vector Sorter (`insetionsort.cpp`):** Encapsula um `std::vector` simples.
-      * *Inserção:* $O(1)$ amortizado (apenas `push_back`, sem ordenação no momento da escrita).
-      * *Mediana:* Utiliza o algoritmo **Insertion Sort** ($O(N^2)$) para ordenar o vetor apenas no momento em que a mediana é requisitada.
-      * *Range Query:* Realiza varredura linear ($O(N)$).
+*\*Nota 1: Na nossa implementação do Vetor, a inserção é O(1) (append), mas o custo é pago na ordenação O(N²) quando a leitura ordenada é solicitada (Lazy Evaluation).*
+*\*\*Nota 2: No vetor não ordenado, achar o mínimo exige varrer tudo ($O(N)$).*
 
-## 4\. Metodologia de Comparação
+## 3. Metodologia
 
-  * **Ambiente:** Compilador C++ (G++), medição de tempo via biblioteca `<chrono>`.
-  * **Dados:** 1.000 registros de temperatura (float) gerados aleatoriamente via *Mersenne Twister* (`gerardados.cpp`).
-  * **Métrica:** Tempo absoluto de execução em Microssegundos ($\mu s$).
-  * **Cenários Testados:**
-    1.  **Insert:** Inserção de todos os 1.000 elementos.
-    2.  **Median Calc:** Cálculo da mediana (exige dados ordenados).
-    3.  **Range Query:** Busca de valores entre 20.0 e 30.0.
-    4.  **Remove:** Remoção de 100 elementos específicos do conjunto.
+Para validar a teoria, foram desenvolvidos scripts em C++ que realizam operações de *benchmark* (medição de tempo de alta precisão em microssegundos) em um conjunto de dados controlado.
 
-## 5\. Resultados Experimentais
+### 3.1. Geração de Dados
+Utilizou-se o algoritmo *Mersenne Twister* (`std::mt19937`) no arquivo `gerardados.cpp` para gerar **1000 leituras** de temperatura simuladas, variando entre -10.0°C e 45.0°C, salvas no arquivo `temperaturas.csv`.
 
-Os dados abaixo foram coletados da execução real do `benchmark.cpp`.
+### 3.2. Estruturas Implementadas
+* **VectorInsertionSort (`insetionsort.cpp`):** Utiliza `std::vector` e aplica o algoritmo de ordenação por inserção apenas quando necessário.
+* **PureMinHeap (`heaptree.cpp`):** Implementação de uma Heap Binária de Mínimo, otimizada para acesso rápido ao menor valor (`min`).
+* **AVLTree (`AVLtree.cpp`):** Árvore Binária de Busca auto-balanceada, garantindo altura logarítmica para buscas e consultas por intervalo (*range queries*) estáveis.
 
-### Tabela de Resultados
+## 4. Análise Experimental e Resultados
 
-| Operação | Tempo HEAP ($\mu s$) | Tempo AVL ($\mu s$) | Tempo VEC (Ins) ($\mu s$) | Vencedor |
-| :--- | :---: | :---: | :---: | :---: |
-| **Insert (1000x)** | 170 | 1481 | **87** | **VEC** |
-| **Median Calc** | 102 | **46** | 2801 | **AVL** |
-| **Range Query** | 29 | 24 | **15** | **VEC** |
-| **Remove (100x)** | 208 | **41** | 124 | **AVL** |
+Os testes foram executados utilizando o script `benchmark.cpp`, que submete as três estruturas às mesmas operações sequencialmente.
 
-### Gráfico Visual
+### 4.1. Desempenho Geral (Comparativo)
+Abaixo, o gráfico/tabela comparativa dos tempos de execução para Inserção, Busca de Mínimo, Range Query e Remoção.
 
-```text
-Escala (us): 0      200      400      600      800      1000+
-             |--------|--------|--------|--------|--------|
+![Gráfico de Benchmark Geral](imagembenchmark.png)
 
-Inserção:
-  VEC  (87)   : [==>         ]
-  HEAP (170)  : [===>        ]
-  AVL  (1481) : [========================================>]
+**Análise dos Resultados:**
+1.  **Inserção:** O Vetor é extremamente rápido para inserir pois apenas adiciona ao final, enquanto Heap e AVL gastam tempo organizando a estrutura.
+2.  **Busca e Range Query:** A AVL demonstra superioridade absoluta. Enquanto o Vetor precisa varrer todos os dados ($O(N)$), a AVL filtra os dados pela estrutura da árvore ($O(\log N)$).
+3.  **Ordenação/Print:** O *Insertion Sort* do vetor se mostrou ineficiente para grandes volumes de dados, confirmando a complexidade quadrática, enquanto a Heap e AVL conseguem extrair dados ordenados de forma muito mais célere.
 
-Mediana:
-  AVL  (46)   : [=>          ]
-  HEAP (102)  : [==>         ]
-  VEC  (2801) : [========================================>]
+### 4.2. Evidência de Execução
+Exemplo de saída do programa `benchmark.cpp` mostrando a vitória da AVL em operações de busca complexas e da Heap em operações de mínimo.
 
-Range Query:
-  VEC  (15)   : [>           ]
-  AVL  (24)   : [>           ]
-  HEAP (29)   : [>           ]
+![Print do Terminal](printbenchmark.png)
 
-Remoção:
-  AVL  (41)   : [=>          ]
-  VEC  (124)  : [==>         ]
-  HEAP (208)  : [====>       ]
-```
+## 5. Estrutura do Código e Arquivos
 
-### Análise dos Dados
+O projeto está organizado da seguinte forma:
 
-1.  **Inserção:** O **Vector** venceu (87us) pois realiza apenas uma operação de adição ao final da memória ($O(1)$), superando a Heap (170us) que faz trocas logarítmicas e a AVL (1481us) que tem alto custo de alocação dinâmica de nós e rotações de balanceamento.
-2.  **Mediana:** O **Vector** teve o pior desempenho disparado (2801us), validando a ineficiência do *Insertion Sort* ($O(N^2)$) para ordenar grandes volumes de dados de uma só vez. A **AVL** venceu (46us) pois os dados já estão estruturados, exigindo apenas um percurso linear.
-3.  **Range Query:** O **Vector** venceu (15us), superando levemente a AVL (24us).
-      * *Explicação Técnica:* Embora a AVL tenha melhor complexidade assintótica (ignora ramos da árvore), para um $N=1000$, a varredura linear de um vetor é extremamente rápida devido à **localidade de cache** (dados contíguos na RAM). A AVL sofre com *cache misses* ao pular entre ponteiros de nós dispersos na memória.
-4.  **Remoção:** A **AVL** venceu (41us) mostrando sua robustez. Sua capacidade de busca binária ($O(\log n)$) superou a busca linear necessária tanto na Heap quanto no Vector para encontrar o elemento a ser removido.
+| Arquivo | Descrição |
+| :--- | :--- |
+| `gerardados.cpp` | Cria o dataset sintético `temperaturas.csv` com 1000 registros aleatórios. |
+| `benchmark.cpp` | **Script Principal.** Instancia as três estruturas, executa as operações e compara os tempos. |
+| `temperaturas.csv` | Arquivo de dados gerado (Input). |
+| `vector_benchmark.cpp` | Implementação da classe `VectorInsertionSort` usada no benchmark. |
+| `heap_benchmark.cpp` | Implementação da classe `PureMinHeap` usada no benchmark. |
+| `avl_benchmark.cpp` | Implementação da classe `AVLTree` usada no benchmark. |
+| `insetionsort.cpp` | Aplicação *standalone* para rodar apenas a versão Vetor. |
+| `heaptree.cpp` | Aplicação *standalone* para rodar apenas a versão Heap. |
+| `AVLtree.cpp` | Aplicação *standalone* para rodar apenas a versão AVL. |
 
-## 6\. Organização do Código e dos Arquivos
+## 6. Como Executar
 
-Como o projeto não utiliza arquivos de cabeçalho (`.h`), a estrutura é composta pelos códigos fonte (`.cpp`) contendo as implementações das classes.
+Para compilar e rodar o projeto, certifique-se de ter um compilador C++ (g++ ou clang) instalado.
 
-  * **`trabalhofinal/`**
-      * **`benchmark.cpp`**: Programa principal. Contém a `main`, lê o CSV, e orquestra os testes comparativos.
-      * **`AVLtree.cpp`**: Implementação da classe `AVLTree` e lógica de balanceamento.
-      * **`heaptree.cpp`**: Implementação da classe `PureMinHeap`.
-      * **`insetionsort.cpp`**: Implementação da classe `VectorInsertionSort` (Vector + Insertion Sort).
-      * **`gerardados.cpp`**: Utilitário para gerar o arquivo CSV com números aleatórios (`std::mt19937`).
-      * **`temperaturas.csv`**: Arquivo de dados gerado.
-
-**Instruções de Compilação e Execução:**
-
-Como não há arquivos `.h`, todos os arquivos `.cpp` das estruturas devem ser compilados junto com o benchmark:
-
+**Passo 1: Gerar os dados**
 ```bash
-# 1. Gerar dados (se necessário)
-g++ gerardados.cpp -o gerardados
-./gerardados
-
-# 2. Compilar o Benchmark (Juntando todos os cpp)
-g++ benchmark.cpp AVLtree.cpp heaptree.cpp insetionsort.cpp -o benchmark
-
-# 3. Rodar
-./benchmark
-```
-
-*(Nota: No Windows, o executável será `benchmark.exe`)*
-
-## 7\. Uso de Ferramentas de IA Generativa
-
-Ferramentas de IA (ChatGPT/Gemini) foram utilizadas para:
-
-Ferramentas de IA generativa foram utilizadas para auxiliar na estruturação deste documento `README.md`, garantindo que ele atendesse a todos os requisitos de documentação mínima exigidos no enunciado do trabalho (estrutura de tópicos) e para formatar os dados do benchmark real em tabelas e gráficos textuais markdown.
-
-## 8\. Referências
-
-  * 
-  * Documentação C++ Reference (std::vector, std::chrono).
-  * 
+g++ gerardados.cpp -o gerar
+./gerar
+# Isso criará o arquivo temperaturas.csv
