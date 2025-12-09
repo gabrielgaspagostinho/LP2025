@@ -50,6 +50,7 @@ Os testes foram executados utilizando o script `benchmark.cpp`, que submete as t
 Abaixo, o gráfico/tabela comparativa dos tempos de execução para Inserção, Busca de Mínimo, Range Query e Remoção.
 
 ![Gráfico de Benchmark Geral](imagembenchmark.png)
+*> (Cole aqui o print do terminal ou gráfico gerado pelo benchmark)*
 
 **Análise dos Resultados:**
 1.  **Inserção:** O Vetor é extremamente rápido para inserir pois apenas adiciona ao final, enquanto Heap e AVL gastam tempo organizando a estrutura.
@@ -60,6 +61,7 @@ Abaixo, o gráfico/tabela comparativa dos tempos de execução para Inserção, 
 Exemplo de saída do programa `benchmark.cpp` mostrando a vitória da AVL em operações de busca complexas e da Heap em operações de mínimo.
 
 ![Print do Terminal](printbenchmark.png)
+*> (Cole aqui o print da execução do código)*
 
 ## 5. Estrutura do Código e Arquivos
 
@@ -86,3 +88,31 @@ Para compilar e rodar o projeto, certifique-se de ter um compilador C++ (g++ ou 
 g++ gerardados.cpp -o gerar
 ./gerar
 # Isso criará o arquivo temperaturas.csv
+```
+
+**Passo 2: Executar o Benchmark Comparativo**
+Este é o teste principal que gera a tabela de comparação.
+```bash
+g++ benchmark.cpp -o benchmark
+./benchmark
+```
+
+**Passo 3: Executar implementações individuais (Opcional)**
+Caso queira testar apenas uma estrutura isoladamente:
+```bash
+g++ AVLtree.cpp -o avl
+./avl
+```
+
+## 7. Uso de IA Generativa
+
+Em conformidade com os requisitos do trabalho, ferramentas de IA (como ChatGPT/Gemini) foram utilizadas neste projeto para:
+1.  **Refatoração de Código:** Auxílio na modularização das classes de Heap e AVL para funcionarem tanto isoladamente quanto dentro do arquivo `benchmark.cpp`.
+2.  **Documentação:** Geração do esboço deste arquivo README e formatação das tabelas em Markdown.
+3.  **Análise de Erros:** Correção de bugs na lógica de rotação da AVL (rotação dupla esquerda-direita).
+
+## 8. Referências
+
+1.  CORMEN, T. H. et al. *Introduction to Algorithms*. 3rd Edition. MIT Press, 2009.
+2.  Material de aula da disciplina de Linguagens de Programação - UFRJ.
+3.  cplusplus.com - Documentation on `std::vector` and `std::chrono`.
